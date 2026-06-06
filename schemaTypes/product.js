@@ -10,6 +10,14 @@ export default {
       validation: Rule => Rule.required()
     },
     {
+      name: 'slug',
+      title: 'Slug (URL)',
+      description: 'Auto-generated from name. Click Generate.',
+      type: 'slug',
+      options: { source: 'name', maxLength: 96 },
+      validation: Rule => Rule.required()
+    },
+    {
       name: 'category',
       title: 'Category',
       type: 'string',
@@ -29,16 +37,28 @@ export default {
       type: 'string',
     },
     {
+      name: 'shortDescription',
+      title: 'Short Description',
+      description: 'Shown on product cards (1-2 sentences)',
+      type: 'string',
+    },
+    {
       name: 'description',
-      title: 'Description',
+      title: 'Full Description',
       type: 'text',
-      rows: 3,
+      rows: 5,
     },
     {
       name: 'image',
       title: 'Product Image',
       type: 'image',
       options: { hotspot: true }
+    },
+    {
+      name: 'datasheet',
+      title: 'Datasheet (PDF)',
+      type: 'file',
+      options: { accept: 'application/pdf' }
     },
     {
       name: 'featured',
