@@ -37,16 +37,97 @@ export default {
       type: 'string',
     },
     {
-      name: 'shortDescription',
-      title: 'Short Description',
-      description: 'Shown on product cards (1-2 sentences)',
-      type: 'string',
-    },
-    {
       name: 'description',
-      title: 'Full Description',
+      title: 'Description',
       type: 'text',
       rows: 5,
+    },
+    {
+      name: 'atAGlance',
+      title: 'At a Glance',
+      description: 'Key bullet points shown on the product page',
+      type: 'array',
+      of: [{ type: 'string' }],
+    },
+    {
+      name: 'specifications',
+      title: 'Specifications',
+      description: 'Tabbed specification sections (Technical, General, Packaging, etc.)',
+      type: 'array',
+      of: [
+        {
+          type: 'object',
+          name: 'specTab',
+          title: 'Specification Tab',
+          fields: [
+            {
+              name: 'tabName',
+              title: 'Tab Name',
+              type: 'string',
+              description: 'e.g. Technical Data, General Data, Packaging Data',
+              validation: Rule => Rule.required()
+            },
+            {
+              name: 'sections',
+              title: 'Sections',
+              type: 'array',
+              of: [
+                {
+                  type: 'object',
+                  name: 'specSection',
+                  title: 'Section',
+                  fields: [
+                    {
+                      name: 'sectionName',
+                      title: 'Section Name',
+                      type: 'string',
+                      description: 'e.g. HDMI Input, Video Encoding (leave blank if no section heading)',
+                    },
+                    {
+                      name: 'rows',
+                      title: 'Rows',
+                      type: 'array',
+                      of: [
+                        {
+                          type: 'object',
+                          name: 'specRow',
+                          title: 'Spec Row',
+                          fields: [
+                            {
+                              name: 'label',
+                              title: 'Label',
+                              type: 'string',
+                              validation: Rule => Rule.required()
+                            },
+                            {
+                              name: 'value',
+                              title: 'Value',
+                              type: 'string',
+                              validation: Rule => Rule.required()
+                            },
+                          ],
+                          preview: {
+                            select: { title: 'label', subtitle: 'value' }
+                          }
+                        }
+                      ]
+                    }
+                  ],
+                  preview: {
+                    select: { title: 'sectionName' },
+                    prepare({ title }) {
+                      return { title: title || '(No section heading)' }
+                    }
+                  }
+                }
+              ]
+            }
+          ],
+          preview: {
+            select: { title: 'tabName' }
+          }
+        }
+      ]
     },
     {
       name: 'image',
