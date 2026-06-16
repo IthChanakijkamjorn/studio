@@ -62,15 +62,15 @@ function readExcel() {
   const workbook = xlsx.readFile(filePath)
 
   // Sheet 1 - products
-  const productsSheet = workbook.Sheets['products']
+  const productsSheet = workbook.Sheets['Products']
   const products = xlsx.utils.sheet_to_json(productsSheet)
 
   // Sheet 2 - specifications
-  const specsSheet = workbook.Sheets['specifications']
+  const specsSheet = workbook.Sheets['Specifications']
   const specs = xlsx.utils.sheet_to_json(specsSheet)
 
   // Sheet 3 - atAGlance
-  const glanceSheet = workbook.Sheets['atAGlance']
+  const glanceSheet = workbook.Sheets['At-a-glance']
   const glance = xlsx.utils.sheet_to_json(glanceSheet)
 
   return { products, specs, glance }
