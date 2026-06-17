@@ -8,7 +8,7 @@ import xlsx from 'xlsx'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// ─── Sanity Client ───────────────────────────────────────────────────────────
+// ─── Sanity Client ─────────────────────────────────────────────────────────────
 const client = createClient({
   projectId: 'q1vklck6',
   dataset: 'production',
@@ -17,7 +17,7 @@ const client = createClient({
   token: process.env.SANITY_TOKEN,
 })
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────────
 
 function slugify(text) {
   return text
@@ -55,7 +55,7 @@ async function uploadDatasheet(filename) {
   return { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
 }
 
-// ─── Read Excel ───────────────────────────────────────────────────────────────
+// ─── Read Excel ─────────────────────────────────────────────────────────────────
 
 function readExcel() {
   const filePath = path.join(__dirname, 'import', 'products.xlsx')
@@ -76,7 +76,19 @@ function readExcel() {
   return { products, specs, glance }
 }
 
-// ─── Build Specifications ─────────────────────────────────────────────────────
+// ─── Build Specifications ──────────────────────────────────────────────────────
+//
+// Handles two formats:
+//
+// Format A — Hardware (Label + Value per row):
+//   ProductName | tabName       | SectionName | Label    | Value
+//   T-8800ZX    | Technical Data| Display     | Resolution | 1920x1080
+//
+// Format B — Software (no Label, SectionName is the feature group, Value is description):
+//   ProductName        | tabName       | SectionName                  | Label | Value
+//   T-8800RP1 software | Technical Data| Centralized Platform Mgmt    |       | Uniformly manages...
+//
+// For Format B rows (Label is empty), we use SectionName as the label and Value as the value.
 
 function buildSpecifications(productName, specs) {
   const productSpecs = specs.filter(
@@ -91,15 +103,21 @@ function buildSpecifications(productName, specs) {
   for (const row of productSpecs) {
     const tabName = String(row.tabName || '').trim()
     const sectionName = String(row.SectionName || '').trim()
-    const label = String(row.Label || '').trim()
+    const rawLabel = String(row.Label || '').trim()
     const value = String(row.Value || '').trim()
 
-    if (!tabName || !label || !value) continue
+    // Must have tabName and value to be useful
+    if (!tabName || !value) continue
+
+    // Format B: no label — use SectionName as label, group under __none__ section
+    const label = rawLabel || sectionName
+    if (!label) continue
+
+    const sectionKey = rawLabel ? (sectionName || '__none__') : '__none__'
 
     if (!tabMap.has(tabName)) tabMap.set(tabName, new Map())
     const sectionMap = tabMap.get(tabName)
 
-    const sectionKey = sectionName || '__none__'
     if (!sectionMap.has(sectionKey)) sectionMap.set(sectionKey, [])
     sectionMap.get(sectionKey).push({
       _type: 'specRow',
@@ -131,7 +149,7 @@ function buildSpecifications(productName, specs) {
   return specTabs
 }
 
-// ─── Build At a Glance ────────────────────────────────────────────────────────
+// ─── Build At a Glance ─────────────────────────────────────────────────────────
 
 function buildAtAGlance(productName, glance) {
   return glance
@@ -140,7 +158,7 @@ function buildAtAGlance(productName, glance) {
     .filter(Boolean)
 }
 
-// ─── Main Import ──────────────────────────────────────────────────────────────
+// ─── Main Import ───────────────────────────────────────────────────────────────
 
 async function importProducts() {
   console.log('📦 Reading Excel file...')
