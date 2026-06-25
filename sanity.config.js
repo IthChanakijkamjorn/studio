@@ -25,6 +25,15 @@ export default defineConfig({
                   .filter('_type == "product"')
                   .defaultOrdering([{field: 'name', direction: 'asc'}])
               ),
+            S.listItem()
+              .title('Projects')
+              .icon(() => '🏗️')
+              .child(
+                S.documentList()
+                  .title('All Projects')
+                  .filter('_type == "project"')
+                  .defaultOrdering([{field: 'year', direction: 'desc'}])
+              ),
           ]),
     }),
     visionTool(),
