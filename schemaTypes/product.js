@@ -23,11 +23,14 @@ export default {
       type: 'string',
       options: {
         list: [
-          { title: 'NATV & Distribution', value: 'natv' },
-          { title: 'Micro Headend', value: 'micro-headend' },
-          { title: 'Sound Systems', value: 'sound' },
-          { title: 'LED & Display', value: 'led' },
-          { title: 'CCTV & Security', value: 'cctv' },
+          { title: 'Speaker', value: 'speaker' },
+          { title: 'Collector', value: 'collector' },
+          { title: 'Microphone', value: 'microphone' },
+          { title: 'Amplifier', value: 'amplifier' },
+          { title: 'Detector', value: 'detector' },
+          { title: 'Remote Control', value: 'remote-control' },
+          { title: 'Terminal', value: 'terminal' },
+          { title: 'Encryptor', value: 'encryptor' },
         ]
       },
       validation: Rule => Rule.required()
