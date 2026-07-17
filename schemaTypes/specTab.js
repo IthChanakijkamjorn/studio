@@ -7,17 +7,19 @@ export default {
       name: 'tabName',
       title: 'Tab Name',
       type: 'string',
-      description: 'e.g. Technical Data, General Data, Packaging Data',
-      validation: Rule => Rule.required()
+      description: 'e.g. Technical Data, General Data, Packaging Data (optional)',
     },
     {
-      name: 'sections',
-      title: 'Sections',
+      name: 'rows',
+      title: 'Rows',
       type: 'array',
-      of: [{ type: 'specSection' }]
+      of: [{ type: 'specRow' }]
     }
   ],
   preview: {
-    select: { title: 'tabName' }
+    select: { title: 'tabName' },
+    prepare({ title }) {
+      return { title: title || '(No tab name)' }
+    }
   }
 }
