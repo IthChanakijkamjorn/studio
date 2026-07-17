@@ -8,7 +8,7 @@ import xlsx from 'xlsx'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// ─── Sanity Client ─────────────────────────────────────────────────────────────
+// ─── Sanity Client ─────────────────────────────────────────────────────────
 const client = createClient({
   projectId: 'q1vklck6',
   dataset: 'production',
@@ -17,7 +17,7 @@ const client = createClient({
   token: process.env.SANITY_TOKEN,
 })
 
-// ─── Helpers ───────────────────────────────────────────────────────────────────
+// ─── Helpers ───────────────────────────────────────────────────────────────
 
 function slugify(text) {
   return text
@@ -55,7 +55,7 @@ async function uploadDatasheet(filename) {
   return { _type: 'file', asset: { _type: 'reference', _ref: asset._id } }
 }
 
-// ─── Read Excel ─────────────────────────────────────────────────────────────────
+// ─── Read Excel ─────────────────────────────────────────────────────────────
 
 function readExcel() {
   const filePath = path.join(__dirname, 'import', 'products.xlsx')
@@ -76,19 +76,10 @@ function readExcel() {
   return { products, specs, glance }
 }
 
-// ─── Build Specifications ──────────────────────────────────────────────────────
+// ─── Build Specifications ───────────────────────────────────────────────────
 //
-// Handles two formats:
-//
-// Format A — Hardware (Label + Value per row):
-//   ProductName | tabName       | SectionName | Label    | Value
-//   T-8800ZX    | Technical Data| Display     | Resolution | 1920x1080
-//
-// Format B — Software (no Label, SectionName is the feature group, Value is description):
-//   ProductName        | tabName       | SectionName                  | Label | Value
-//   T-8800RP1 software | Technical Data| Centralized Platform Mgmt    |       | Uniformly manages...
-//
-// For Format B rows (Label is empty), we use SectionName as the label and Value as the value.
+// Excel columns: ProductName | tabName | Label | Value
+// Output: array of specTab { tabName (optional), rows[] }
 
 function buildSpecifications(productName, specs) {
   const productSpecs = specs.filter(
@@ -97,29 +88,20 @@ function buildSpecifications(productName, specs) {
 
   if (!productSpecs.length) return []
 
-  // Group by tabName → sectionName → rows
+  // Group by tabName → rows
   const tabMap = new Map()
 
   for (const row of productSpecs) {
     const tabName = String(row.tabName || '').trim()
-    const sectionName = String(row.SectionName || '').trim()
-    const rawLabel = String(row.Label || '').trim()
+    const label = String(row.Label || '').trim()
     const value = String(row.Value || '').trim()
 
-    // Must have tabName and value to be useful
-    if (!tabName || !value) continue
+    if (!label || !value) continue
 
-    // Format B: no label — use SectionName as label, group under __none__ section
-    const label = rawLabel || sectionName
-    if (!label) continue
+    const tabKey = tabName || '__none__'
 
-    const sectionKey = rawLabel ? (sectionName || '__none__') : '__none__'
-
-    if (!tabMap.has(tabName)) tabMap.set(tabName, new Map())
-    const sectionMap = tabMap.get(tabName)
-
-    if (!sectionMap.has(sectionKey)) sectionMap.set(sectionKey, [])
-    sectionMap.get(sectionKey).push({
+    if (!tabMap.has(tabKey)) tabMap.set(tabKey, [])
+    tabMap.get(tabKey).push({
       _type: 'specRow',
       _key: slugify(`${label}-${Math.random().toString(36).slice(2, 7)}`),
       label,
@@ -128,28 +110,19 @@ function buildSpecifications(productName, specs) {
   }
 
   const specTabs = []
-  for (const [tabName, sectionMap] of tabMap) {
-    const sections = []
-    for (const [sectionKey, rows] of sectionMap) {
-      sections.push({
-        _type: 'specSection',
-        _key: slugify(`${sectionKey}-${Math.random().toString(36).slice(2, 7)}`),
-        sectionName: sectionKey === '__none__' ? '' : sectionKey,
-        rows,
-      })
-    }
+  for (const [tabKey, rows] of tabMap) {
     specTabs.push({
       _type: 'specTab',
-      _key: slugify(`${tabName}-${Math.random().toString(36).slice(2, 7)}`),
-      tabName,
-      sections,
+      _key: slugify(`${tabKey}-${Math.random().toString(36).slice(2, 7)}`),
+      tabName: tabKey === '__none__' ? '' : tabKey,
+      rows,
     })
   }
 
   return specTabs
 }
 
-// ─── Build At a Glance ─────────────────────────────────────────────────────────
+// ─── Build At a Glance ──────────────────────────────────────────────────────
 
 function buildAtAGlance(productName, glance) {
   return glance
@@ -158,7 +131,7 @@ function buildAtAGlance(productName, glance) {
     .filter(Boolean)
 }
 
-// ─── Main Import ───────────────────────────────────────────────────────────────
+// ─── Main Import ──────────────────────────────────��─────────────────────────
 
 async function importProducts() {
   console.log('📦 Reading Excel file...')
@@ -189,7 +162,8 @@ async function importProducts() {
       _type: 'product',
       name,
       slug: { _type: 'slug', current: slugify(name) },
-      category: String(row.Category || '').trim().toLowerCase(),
+      mainCategory: String(row['Main-Category'] || '').trim().toLowerCase(),
+      subCategory: String(row['Sub-Category'] || '').trim().toLowerCase(),
       brand: String(row.Brand || '').trim(),
       description: String(row.Description || '').trim(),
       featured: String(row.Feature || '').trim().toLowerCase() === 'true',
