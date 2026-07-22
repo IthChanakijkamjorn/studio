@@ -68,8 +68,6 @@ function readExcel(filePath) {
 }
 
 // ─── Build Specifications ───────────────────────────────────────────────────
-//
-// Excel columns: ProductName | tabName | Label | Value
 
 function buildSpecifications(productName, specs) {
   const productSpecs = specs.filter(
@@ -171,24 +169,42 @@ async function importFromFile(filePath) {
 async function importProducts() {
   const importDir = path.join(__dirname, 'import')
 
+  // Read brand filters from command line args e.g. node importProducts.js ITC WISI
+  const brandArgs = process.argv.slice(2).map(b => b.toUpperCase())
+
   // Find all *_products.xlsx files
-  let files = []
+  let allFiles = []
   try {
-    files = readdirSync(importDir).filter(f => f.endsWith('_products.xlsx'))
+    allFiles = readdirSync(importDir).filter(f => f.endsWith('_products.xlsx'))
   } catch {
     console.error(`❌ Could not read import directory: ${importDir}`)
     process.exit(1)
   }
 
-  if (files.length === 0) {
+  if (allFiles.length === 0) {
     console.warn('⚠️  No *_products.xlsx files found in the import/ folder.')
     console.warn('    Expected format: ITC_products.xlsx, WISI_products.xlsx, etc.')
     process.exit(0)
   }
 
-  console.log(`📦 Found ${files.length} brand file(s): ${files.join(', ')}`)
+  // Filter by brand args if provided
+  let filesToProcess = allFiles
+  if (brandArgs.length > 0) {
+    filesToProcess = allFiles.filter(f => {
+      const fileBrand = f.replace('_products.xlsx', '').toUpperCase()
+      return brandArgs.includes(fileBrand)
+    })
 
-  for (const file of files) {
+    if (filesToProcess.length === 0) {
+      console.warn(`⚠️  No matching files found for brand(s): ${brandArgs.join(', ')}`)
+      console.warn(`    Available files: ${allFiles.join(', ')}`)
+      process.exit(0)
+    }
+  }
+
+  console.log(`📦 Found ${allFiles.length} brand file(s) total, processing: ${filesToProcess.join(', ')}`)
+
+  for (const file of filesToProcess) {
     try {
       await importFromFile(path.join(importDir, file))
     } catch (err) {
