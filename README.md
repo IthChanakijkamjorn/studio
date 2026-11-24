@@ -22,8 +22,8 @@ Sheet **Products** (column order does not matter, only the header names):
 | Column | Notes |
 |---|---|
 | Brand | Required. Same spelling as the image/datasheet folder. |
-| Model | Recommended. Unique; used to match the product on re-import. If empty, guessed from the image file name. |
-| Name | Required. Also the key for the other two sheets. |
+| Model | Required. Unique; used to match the product on re-import. |
+| Name | Optional. Shown on both websites; if empty, Brand + Model is shown (e.g. BOSE AM40). |
 | Main-Category, Sub-Category | Website menu, lowercase-with-dashes, e.g. `pa-speaker`, `ceiling-speaker`. |
 | Description | |
 | Image, Datasheet | File names inside `images/<Brand>/` and `datasheets/<Brand>/`. A new image file name replaces the photo. |
@@ -33,6 +33,7 @@ Sheet **Products** (column order does not matter, only the header names):
 
 Sheet **At-a-glance**: `ProductName`, `Bullets` (one bullet per row).
 Sheet **Specifications**: `ProductName`, `tabName`, `Label`, `Value` (one row per spec line).
+`ProductName` is the product's Name, or its Model when Name is empty.
 A product with no rows in these two sheets keeps the bullets/specs it already has.
 
 **Export → edit → import:** the back office's ดาวน์โหลด Excel button (สินค้า and รายการสินค้าทั้งหมด pages) downloads
