@@ -36,7 +36,7 @@ Sheet **Specifications**: `ProductName`, `tabName`, `Label`, `Value` (one row pe
 A product with no rows in these two sheets keeps the bullets/specs it already has.
 
 **Export → edit → import:** the back office's ดาวน์โหลด Excel button (สินค้า and รายการสินค้าทั้งหมด pages) downloads
-every product in this exact layout. Edit it, save it here as `<NAME>_products.xlsx`, push and import. If you do that,
+every product in this exact layout. Edit it, then on Products → Import click **อัปโหลดไฟล์ Excel** and pick the file (no push needed). Or save it here as `<NAME>_products.xlsx`, push and import. If you do that,
 delete the old per-brand files for the same products so two files don't disagree. The layout is defined in the back
 office's `src/lib/productSheet.ts`, and this template is generated from it.
 
