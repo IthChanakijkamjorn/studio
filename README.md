@@ -19,21 +19,26 @@ import/
 ### Excel format
 Sheet **Products** (column order does not matter, only the header names):
 
-| Column | Used by | Notes |
-|---|---|---|
-| Brand | both | Required. Same spelling as the image/datasheet folder. |
-| Model | both | Recommended. Unique; used to match the product on re-import. If empty, guessed from the image file name. |
-| Name | both | Required. Also the key for the other two sheets. |
-| Main-Category, Sub-Category | website | lowercase-with-dashes, e.g. `pa-speaker`, `ceiling-speaker`. |
-| Description | both | |
-| Image, Datasheet | both | File names inside `images/<Brand>/` and `datasheets/<Brand>/`. A new image file name replaces the photo. |
-| Website | website | TRUE or empty = show on website, FALSE = back office only. |
-| Featured | website | TRUE = featured product. |
-| Unit, Supplier, Min-Stock | back office | Optional. Unit defaults to ชิ้น. |
-| Opening-Stock | back office | Optional. Only used the first time the product is created; after that use stock movements. |
+| Column | Notes |
+|---|---|
+| Brand | Required. Same spelling as the image/datasheet folder. |
+| Model | Recommended. Unique; used to match the product on re-import. If empty, guessed from the image file name. |
+| Name | Required. Also the key for the other two sheets. |
+| Main-Category, Sub-Category | Website menu, lowercase-with-dashes, e.g. `pa-speaker`, `ceiling-speaker`. |
+| Description | |
+| Image, Datasheet | File names inside `images/<Brand>/` and `datasheets/<Brand>/`. A new image file name replaces the photo. |
+| Quantity | Stock on hand, used only when the product is created. Re-imports ignore it; change stock in the back office (รับ/จ่ายสินค้า). |
+| Unit | Defaults to ชิ้น. |
+| Website | TRUE or empty = show on website, FALSE = back office only. |
 
 Sheet **At-a-glance**: `ProductName`, `Bullets` (one bullet per row).
 Sheet **Specifications**: `ProductName`, `tabName`, `Label`, `Value` (one row per spec line).
+A product with no rows in these two sheets keeps the bullets/specs it already has.
+
+**Export → edit → import:** the back office's ดาวน์โหลด Excel button (สินค้า and รายการสินค้าทั้งหมด pages) downloads
+every product in this exact layout. Edit it, save it here as `<NAME>_products.xlsx`, push and import. If you do that,
+delete the old per-brand files for the same products so two files don't disagree. The layout is defined in the back
+office's `src/lib/productSheet.ts`, and this template is generated from it.
 
 `importProducts.js` is the old direct-to-Sanity importer. Do not use it any more: it bypasses the back office.
 
